@@ -94,35 +94,6 @@ def process_exercises(ppid):
     return df2
 
 
-def construct_dataset(ppids, data_type):
-    """
-    Takes a list of participant IDs 'ppids' and the 'data_type' to construct
-    either the 'exercise' or 'letter'-based dataset from individual users' data.
-    """
-    df_all = pd.DataFrame()
-    for pp in ppids:
-        if data_type == "exercise":
-            df_pp = process_exercises(pp)
-        else:
-            df_pp = pd.DataFrame()
-        df_all = pd.concat([df_all, df_pp])
-    return df_all
-
-
-connection = mongoengine.connect(host=config.CONNECT_STR)
-db = connection.get_database("progress")
-participants = db.list_collection_names()
-
-exercise_data = construct_dataset(participants, data_type="exercise")
-
-exercise_data.plot(kind = 'scatter', x = 'exercise_number', y = 'num_mistakes')
-
-plt.show()
-
-mongoengine.disconnect()
-
-
-
 def process_letters(exercise):
     """
     Takes a participant's exercise object and for each attempt at a letter
@@ -298,6 +269,7 @@ def process_letters(exercise):
     )
     #df[["word", "position", "correct_letter", "chosen_letter", "num_attempts", "retry", "right_to_left"]]
     df["first_try"] = np.where(df.num_attempts.eq(1) & df.correct.eq("true"), "TRUE", "FALSE")
+    df["first_try_flt"] = np.where(df.first_try.eq("TRUE"), 1.0, 0.0)
     df["prev_letter"] = df["chosen_letter"].shift()
     df["same_letter_in_diff_word"] = np.where(df.prev_letter.eq(df.chosen_letter) & df.word.ne(df.prev_word), "TRUE", "FALSE")
     df["prev_time"] = df["answer_time"].shift()
@@ -320,12 +292,37 @@ def get_letter_data(ppid):
     return df_pp
 
 
+def construct_dataset(ppids, data_type):
+    """
+    Takes a list of participant IDs 'ppids' and the 'data_type' to construct
+    either the 'exercise' or 'letter'-based dataset from individual users' data.
+    """
+    df_all = pd.DataFrame()
+    for pp in ppids:
+        if data_type == "exercise":
+            df_pp = process_exercises(pp)
+        else:
+            df_pp = get_letter_data(pp)
+        df_all = pd.concat([df_all, df_pp])
+    return df_all
 
 
+connection = mongoengine.connect(host=config.CONNECT_STR)
+db = connection.get_database("progress")
+participants = db.list_collection_names()
+
+# test exercise data
+
+exercise_data = construct_dataset(participants, data_type="exercise")
+
+exercise_data.plot(kind = 'scatter', x = 'exercise_number', y = 'num_mistakes')
+
+plt.show()
+
+
+# test letter data
 
 letter_data = construct_dataset(participants, data_type="letter")
-
-letter_data["first_try_flt"] = np.where(letter_data.first_try.eq("TRUE"), 1.0, 0.0)
 
 letter_bars = letter_data.groupby(["correct_letter"]).sum().first_try_flt / letter_data.groupby(["correct_letter"]).count().first_try
 
@@ -339,3 +336,5 @@ letter_bars_sub = letter_data_sub.groupby(["correct_letter"]).sum().first_try_fl
 
 letter_bars_sub.plot.bar()
 plt.show()
+
+mongoengine.disconnect()
