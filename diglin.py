@@ -102,16 +102,8 @@ def process_letters(exercise):
     Takes a participant's exercise object and for each attempt at a letter
     collects relevant variables, which are returned as a dataframe.
     """
-    # get response events while keeping track of original index
-    action_events = [(num_i, i) for num_i, i in enumerate(exercise["events"], 0) if "action" in i]
-    response_events = [i for i in action_events if i[1]["action"] == "attempt"]
-    if len(response_events) == 0:
+    if len(exercise.response_events) == 0:
         return pd.DataFrame()
-    # get audio events for later use
-    audio_events = {str(num_i): i for num_i, i in enumerate(exercise["events"], 0) if i["event"] == "playAudio"}
-    # get picture events for later use
-    picture_events = {str(num_i): i for num_i, i in enumerate(exercise["events"], 0) if i["event"] == "showImage"}
-    picture_ends = {i["uuid"]: float(i["time"]) for i in exercise["events"] if i["event"] == "hideImage" and i["uuid"] != ""}
     # initialize dictionary
     d = {
         "user_id": [],
@@ -136,8 +128,6 @@ def process_letters(exercise):
         "times_sound_played_between_words": [],
         "time_from_first_sound_audio_in_word_attempt": [],        # in word attempt means that occurences of sound followed by sounds of a diff. word do not count)
         "time_from_first_word_audio_in_word_attempt": [],          # because users are not expect to retain this audio information in working memory
-        #"time_from_sound_between_answers": [],
-        #"time_from_word_between_answers": [],
         "pictures_shown_between_answers": [],
         "duration_picture_shown_between_answers": [],
         "pictures_shown_between_words": [],
@@ -154,7 +144,7 @@ def process_letters(exercise):
     pics_betw_words = []
     dur_pic_betw_words = 0
     wrd_attempt = 0
-    for resp in response_events:
+    for resp_n, resp in enumerate(exercise.response_events, 0):
         d["user_id"].append(exercise["user"])
         d["exercise_id"].append(exercise["_id"].__str__())
         d["start_time"].append(exercise["timestamp"])
@@ -174,45 +164,10 @@ def process_letters(exercise):
             first_pic_times = {}
         d["word_attempt"].append(wrd_attempt)
         d["answer_time"].append(float(resp[1]["time"]))
-        # look back for audio events between previous resp and current resp; this can be a function (or even a method of Exercise or ExerciseT2)
-        # parameters to function: first_sound_times, first_word_times, audio_events, exercise, prev_resp_i, (resp[0], wrd, pos) last three can all be derived from resp
-        # function returns: first_sound_times, first_word_times, words_betw_answers, sounds_betw_answers, n_word_betw_answers, n_sound_betw_answers
-        words_betw_answers = []
-        sounds_betw_answers = []
-        n_word_betw_answers = 0
-        n_sound_betw_answers = 0
-        played_audio_indices = [int(i) for i in audio_events if int(i) > prev_resp_i and int(i) < resp[0]]
-        for audio_i in played_audio_indices:
-            audio_event = exercise["events"][audio_i]
-            if audio_event["action"] == "play":             # if a word is played
-                wrd_label = audio_event["audio"].split(".")[0]
-                words_betw_answers.append(wrd_label)
-                n_word_betw_answers += 1 if wrd_label == wrd else 0
-                if wrd_label not in first_word_times:
-                    first_word_times[wrd_label] = float(audio_event["time"])
-            else:                                           # if a sound is played
-                # get index of the sound and the word the sound belongs to
-                sound_tpl = (audio_event["index"], audio_event["target"])
-                sounds_betw_answers.append(str(sound_tpl))
-                n_sound_betw_answers += 1 if sound_tpl[1] == wrd and sound_tpl[0] == pos else 0
-                if str(sound_tpl) not in first_sound_times:
-                    first_sound_times[str(sound_tpl)] = float(audio_event["time"])
-        # look back for picture events between previous resp and current resp; this can be a function
-        pics_betw_answers = []
-        dur_pic_betw_answers = 0
-        shown_picture_indices = [int(i) for i in picture_events if int(i) > prev_resp_i and int(i) < resp[0]]
-        for pic_i in shown_picture_indices:
-            pic_event = exercise["events"][pic_i]
-            pic_label = pic_event["target"]
-            pics_betw_answers.append(pic_label)
-            if pic_event["uuid"] in picture_ends:
-                pic_end = min(picture_ends[pic_event["uuid"]], float(resp[1]["time"]))             # make sure we use end time before response
-            else:
-                pic_end = float("nan")
-            pic_dur = pic_end - float(pic_event["time"])
-            dur_pic_betw_answers += pic_dur if pic_label == wrd else 0
-            if pic_label not in first_pic_times:
-                first_pic_times[pic_label] = float(pic_event["time"])
+        # look back for audio events between previous resp and current resp
+        first_sound_times, first_word_times, words_betw_answers, sounds_betw_answers, n_word_betw_answers, n_sound_betw_answers = exercise.get_audio(first_sound_times, first_word_times, prev_resp_i, resp_n)
+        # look back for picture events between previous resp and current resp
+        first_pic_times, pics_betw_answers, dur_pic_betw_answers = exercise.get_pictures(first_pic_times, prev_resp_i, resp_n)
         # these variables are only updated between words
         if wrd != prev_wrd:
             words_betw_words = words_betw_answers
@@ -254,8 +209,6 @@ def process_letters(exercise):
         prev_wrd = wrd
     # construct initial dataframe
     df = pd.DataFrame(d)
-    #df[["word", "correct_letter", "chosen_letter", "words_played_between_answers", "time_from_first_word_audio_in_word_attempt"]]
-    #df[["word", "correct_letter", "chosen_letter", "pictures_shown_between_answers", "time_from_first_picture_in_word_attempt"]]
     # derive more variables from initial variables
     df["num_attempts"] = df.groupby(["word", "position"]).cumcount() + 1
     df["prev_correct"] = df["correct"].shift()
@@ -298,7 +251,7 @@ def get_letter_data(ppid):
     df_pp = pd.DataFrame()
     for result in results:
         # create T2 result to add T2-specific methods
-        t2_result = models.ExerciseT2(placeholder="bla", **result.to_mongo())
+        t2_result = models.ExerciseT2(**result.to_mongo())
         # process it
         df_exercise = process_letters(t2_result)
         df_pp = pd.concat([df_pp, df_exercise])
