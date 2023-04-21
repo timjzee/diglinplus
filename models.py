@@ -2,7 +2,7 @@ import mongoengine
 import config
 
 class Exercise(mongoengine.Document):
-    meta = {'collection': config.col_name}
+    meta = {'collection': config.col_name, 'allow_inheritance': True}
     _id = mongoengine.ObjectIdField()
     user = mongoengine.StringField()
     progress = mongoengine.StringField()
@@ -31,3 +31,7 @@ class Exercise(mongoengine.Document):
             return float("nan"), "NA"
     def return_duration(self):
         return float([i for i in self.events if i["event"] != "close"][-1]["time"]) / 1000
+
+
+class ExerciseT2(Exercise):
+    placeholder = mongoengine.StringField()

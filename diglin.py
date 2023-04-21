@@ -23,6 +23,9 @@ def process_exercises(ppid):
     config.col_name = ppid
     # we need to reload Exercise for each participant, because collection name changes
     reload(models)
+    # update inheritance of collection
+    collection = models.Exercise._get_collection()
+    collection.update_many({'_cls': None}, {'$set': {'_cls': 'Exercise'}})
     results = models.Exercise.objects.order_by("+timestamp")
     # initialize dictionary
     d = {
@@ -171,7 +174,9 @@ def process_letters(exercise):
             first_pic_times = {}
         d["word_attempt"].append(wrd_attempt)
         d["answer_time"].append(float(resp[1]["time"]))
-        # look back for audio events between previous resp and current resp
+        # look back for audio events between previous resp and current resp; this can be a function (or even a method of Exercise or ExerciseT2)
+        # parameters to function: first_sound_times, first_word_times, audio_events, exercise, prev_resp_i, (resp[0], wrd, pos) last three can all be derived from resp
+        # function returns: first_sound_times, first_word_times, words_betw_answers, sounds_betw_answers, n_word_betw_answers, n_sound_betw_answers
         words_betw_answers = []
         sounds_betw_answers = []
         n_word_betw_answers = 0
@@ -192,7 +197,7 @@ def process_letters(exercise):
                 n_sound_betw_answers += 1 if sound_tpl[1] == wrd and sound_tpl[0] == pos else 0
                 if str(sound_tpl) not in first_sound_times:
                     first_sound_times[str(sound_tpl)] = float(audio_event["time"])
-        # look back for picture events between previous resp and current resp
+        # look back for picture events between previous resp and current resp; this can be a function
         pics_betw_answers = []
         dur_pic_betw_answers = 0
         shown_picture_indices = [int(i) for i in picture_events if int(i) > prev_resp_i and int(i) < resp[0]]
@@ -284,10 +289,18 @@ def get_letter_data(ppid):
     and returns a dataframe containing variables relevant to letter-level
     questions.
     """
-    results = db[ppid].find({"application": "t2_sleep_de_letters"}).sort("timestamp", 1)
+    config.col_name = ppid
+    # we need to reload Exercise for each participant, because collection name changes
+    reload(models)
+    collection = models.Exercise._get_collection()
+    collection.update_many({'_cls': None}, {'$set': {'_cls': 'Exercise'}})
+    results = models.Exercise.objects(application="t2_sleep_de_letters").order_by("+timestamp")
     df_pp = pd.DataFrame()
     for result in results:
-        df_exercise = process_letters(result)
+        # create T2 result to add T2-specific methods
+        t2_result = models.ExerciseT2(placeholder="bla", **result.to_mongo())
+        # process it
+        df_exercise = process_letters(t2_result)
         df_pp = pd.concat([df_pp, df_exercise])
     return df_pp
 
