@@ -4,7 +4,6 @@ import models
 from importlib import reload
 import numpy as np
 import matplotlib.pyplot as plt
-from datetime import datetime
 import pandas as pd
 pd.set_option('display.max_rows', None)
 pd.set_option('mode.chained_assignment', None)
@@ -70,8 +69,6 @@ def process_exercises(ppid):
     for i in range(1, len(df)):
         df.loc[i, "prec_consec_attempts"] = df.loc[i, "prec_consec_attempts"] * (df.loc[i-1, "prec_consec_attempts"] + df.loc[i, "prec_consec_attempts"])
     df["same_as_next"] = df["same_as_prev"].shift(-1)
-    # subset the dataframe so it only includes t2 exercises
-    #df2 = df.loc[df["template"] == "t2_sleep_de_letters"]
     # add a final variable for T2
     df["behaviour_after_first_mistake"] = np.select(
         condlist = [
@@ -214,7 +211,7 @@ def process_letters(exercise):
     df["prev_correct"] = df["correct"].shift()
     df["prev_letter_position"] = df["position"].shift()
     df["retry"] = np.where(df.prev_correct.eq("false") & df.prev_word.eq(df.word) & df.prev_letter_position.eq(df.position), "TRUE", "FALSE")
-    df["right_to_left"] = np.select(
+    df["left_to_right"] = np.select(
         condlist=[
             df.position.eq(df.prev_letter_position + 1) & df.word.eq(df.prev_word),
             df.retry.eq("TRUE") | df.position.eq(0)
@@ -304,5 +301,7 @@ letter_bars_sub = letter_data_sub.groupby(["correct_letter"]).sum().first_try_fl
 
 letter_bars_sub.plot.bar()
 plt.show()
+
+letter_data.to_csv("letter_data.csv")
 
 mongoengine.disconnect()
