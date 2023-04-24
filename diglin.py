@@ -71,16 +71,16 @@ def process_exercises(ppid):
         df.loc[i, "prec_consec_attempts"] = df.loc[i, "prec_consec_attempts"] * (df.loc[i-1, "prec_consec_attempts"] + df.loc[i, "prec_consec_attempts"])
     df["same_as_next"] = df["same_as_prev"].shift(-1)
     # subset the dataframe so it only includes t2 exercises
-    df2 = df.loc[df["template"] == "t2_sleep_de_letters"]
-    # add a final variable
-    df2["behaviour_after_first_mistake"] = np.select(
+    #df2 = df.loc[df["template"] == "t2_sleep_de_letters"]
+    # add a final variable for T2
+    df["behaviour_after_first_mistake"] = np.select(
         condlist = [
-            df2.same_as_next.eq(1.0) & df2.action_after_first_mistake.eq("quit"),
-            df2.same_as_next.eq(1.0) & df2.action_after_first_mistake.eq("continue") & df2.completed_float.eq(1.0),
-            df2.same_as_next.eq(1.0) & df2.action_after_first_mistake.eq("continue") & df2.completed_float.eq(0.0),
-            df2.same_as_next.eq(0.0) & df2.action_after_first_mistake.eq("quit"),
-            df2.same_as_next.eq(0.0) & df2.action_after_first_mistake.eq("continue") & df2.completed_float.eq(1.0),
-            df2.same_as_next.eq(0.0) & df2.action_after_first_mistake.eq("continue") & df2.completed_float.eq(0.0)
+            df.same_as_next.eq(1.0) & df.action_after_first_mistake.eq("quit"),
+            df.same_as_next.eq(1.0) & df.action_after_first_mistake.eq("continue") & df.completed_float.eq(1.0),
+            df.same_as_next.eq(1.0) & df.action_after_first_mistake.eq("continue") & df.completed_float.eq(0.0),
+            df.same_as_next.eq(0.0) & df.action_after_first_mistake.eq("quit"),
+            df.same_as_next.eq(0.0) & df.action_after_first_mistake.eq("continue") & df.completed_float.eq(1.0),
+            df.same_as_next.eq(0.0) & df.action_after_first_mistake.eq("continue") & df.completed_float.eq(0.0)
         ],
         choicelist = [
             "retry",
@@ -94,7 +94,7 @@ def process_exercises(ppid):
     )
     # resulting warning can be silenced with: pd.options.mode.chained_assignment = None
     # return the participants dataframe
-    return df2
+    return df
 
 
 def process_letters(exercise):
@@ -284,6 +284,8 @@ exercise_data = construct_dataset(participants, data_type="exercise")
 exercise_data.plot(kind = 'scatter', x = 'exercise_number', y = 'num_mistakes')
 
 plt.show()
+
+exercise_data.to_csv("exercise_data.csv")
 
 
 # test letter data
