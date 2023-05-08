@@ -1,5 +1,6 @@
 # diglinplus
 Scripts for DigLin+ data processing and analysis
+See [examples](https://www.nt2.nl/nl/dossier/diglin/diglin-videos) of exercises.
 
 ## Instructions
 - Clone this repo `git clone git@github.com:timjzee/diglinplus.git`
@@ -83,6 +84,7 @@ Every row represents 1 attempt at a letter within Template 2 “Drag the letters
 - Does the learner work from left to right?
 - How much time is there between listening to the sound and finding the right letter? 
 - Which letters are in the right place at once?
+- How many times does the user play a sound during the exercise? How does this change over time?
 
 In R:
 ```R
@@ -94,6 +96,12 @@ hist(log(d[d$correct == "true",]$time_from_first_sound_audio_in_word_attempt), b
 # Question 3
 prop_first_try <- sapply(names(table(d$correct_letter)), function(x) sum(d[d$correct_letter == x,]$first_try_flt)) / table(d$correct_letter)
 barplot(prop_first_try)
+# Question 4
+n_sounds_played_between_answers <- sapply(unique(d$exercise_id), function(x) sum(d[d$exercise_id==x,]$times_sound_played_between_answers))
+pp <- sapply(unique(d$exercise_id), function(x) d[d$exercise_id==x,]$user_id[1])
+pp_tbl <- table(pp)
+exercise_number_pp <- sapply(unique(pp), function(x) 1:pp_tbl[x])
+plot(unlist(exercise_number_pp), n_sounds_played_between_answers)
 ```
 
 #### Columns
