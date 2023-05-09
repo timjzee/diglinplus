@@ -1,5 +1,5 @@
 # diglinplus
-Scripts for DigLin+ data processing and analysis
+Scripts for DigLin+ data processing and analysis.
 See [examples](https://www.nt2.nl/nl/dossier/diglin/diglin-videos) of exercises.
 
 ## Instructions
@@ -84,24 +84,66 @@ Every row represents 1 attempt at a letter within Template 2 “Drag the letters
 - Does the learner work from left to right?
 - How much time is there between listening to the sound and finding the right letter? 
 - Which letters are in the right place at once?
-- How many times does the user play a sound during the exercise? How does this change over time?
+- How many times does the user play a sound/word during the exercise? How does this change over time?
+- Does the user try all blue buttons in the lettersquare from top-left to bottom-right? How does this change over time?
 
 In R:
 ```R
 d <- read.csv("letter_data.csv")
+
 # Question 1
 table(d$left_to_right)
+
 # Question 2
 hist(log(d[d$correct == "true",]$time_from_first_sound_audio_in_word_attempt), breaks = 100)
+
 # Question 3
 prop_first_try <- sapply(names(table(d$correct_letter)), function(x) sum(d[d$correct_letter == x,]$first_try_flt)) / table(d$correct_letter)
 barplot(prop_first_try)
+
 # Question 4
-n_sounds_played_between_answers <- sapply(unique(d$exercise_id), function(x) sum(d[d$exercise_id==x,]$times_sound_played_between_answers))
+d$correct_int <- ifelse(d$correct == "true", 1, 0)
+n_sounds_played_between_answers <- sapply(unique(d$exercise_id), function(x) sum(d[d$exercise_id==x,]$times_sound_played_between_answers)/(sum(d[d$exercise_id==x,]$correct_int)+1))
+n_words_played_between_answers <- sapply(unique(d$exercise_id), function(x) sum(d[d$exercise_id==x,]$times_word_played_between_answers)/(sum(d[d$exercise_id==x,]$correct_int)+1))
 pp <- sapply(unique(d$exercise_id), function(x) d[d$exercise_id==x,]$user_id[1])
 pp_tbl <- table(pp)
 exercise_number_pp <- sapply(unique(pp), function(x) 1:pp_tbl[x])
-plot(unlist(exercise_number_pp), n_sounds_played_between_answers)
+d2 <- data.frame(user_id=pp, exercise_id=names(n_sounds_played_between_answers), exercise_number=unlist(exercise_number_pp), n_sounds_played_between_answers, n_words_played_between_answers)
+plot(d2$exercise_number, d2$n_words_played_between_answers, col=rgb(red = 0, green = 0, blue = 1, alpha = 0.2))
+plot(d2$exercise_number, d2$n_sounds_played_between_answers, col=rgb(red = 1, green = 0, blue = 0, alpha = 0.2))
+# There is a small but clear effect in the aggregated data: people play fewer sounds in later exercises. 
+# But there is a huge amount of variation between users.
+# Some people show the effect in the aggregated data:
+barplot(d2[d2$user_id==unique(d2$user_id)[18],]$n_sounds_played_between_answers)
+barplot(d2[d2$user_id==unique(d2$user_id)[14],]$n_sounds_played_between_answers)
+# Some people never listen to sounds:
+barplot(d2[d2$user_id==unique(d2$user_id)[15],]$n_sounds_played_between_answers)
+# Some consistently listen to sounds:
+barplot(d2[d2$user_id==unique(d2$user_id)[17],]$n_sounds_played_between_answers)
+# Others switch strategies: listening to sounds vs. listening to words:
+s <- d2[d2$user_id==unique(d2$user_id)[20],]$n_sounds_played_between_answers
+w <- d2[d2$user_id==unique(d2$user_id)[20],]$n_words_played_between_answers
+barplot(t(array(c(s,w), dim = c(length(s), 2))))
+
+# Question 5
+# First we need establish for each word list, which letters are enabled, and sort them alphabetically:
+enabled_letters <- sapply(unique(d$word_list), function (x) sort(unique(d[d$word_list == x,]$correct_letter)))
+# Then we need to consider the strategy: a user who does not know any letters will guess the letter first and if the letter is wrong
+# they will try the next enabled letter in the alphabet
+# so we need the previous answer
+d$prev_answer <- unlist(sapply(unique(d$exercise_id), function (x) c(NA, d[d$exercise_id == x,]$chosen_letter[1:(nrow(d[d$exercise_id == x,])-1)])))
+# and we need to know the index of prev_answer in the enabled alphabet
+d$prev_answer_i <- mapply(function (pa, wl) match(pa, enabled_letters[[wl]]), d$prev_answer, d$word_list)
+# and the index of the current answer:
+d$cur_answer_i <- mapply(function (a, wl) match(a, enabled_letters[[wl]]), d$chosen_letter, d$word_list)
+# if the alphabetical strategy is followed: cur_answer_i should be prev_answer_i + 1 if prev_correct == "false"
+d$alphabetical <- as.integer(ifelse(d$prev_correct == "false", d$cur_answer_i == (d$prev_answer_i + 1), NA))
+# now we can see how often this strategy is followed during an exercise, and whether this changes as users become more experienced
+# we need to normalize for number of incorrect answers in an exercise
+d2$n_alphabetical_answers <- sapply(unique(d$exercise_id), function(x) sum(d[d$exercise_id==x,]$alphabetical, na.rm=T)/(nrow(d[d$exercise_id==x,]) - sum(d[d$exercise_id==x,]$correct_int)+1))
+plot(d2$exercise_number, d2$n_alphabetical_answers, col=rgb(red = 0, green = 0, blue = 1, alpha = 0.2))
+# only a small effect
+cor(d2$exercise_number, d2$n_alphabetical_answers)
 ```
 
 #### Columns
