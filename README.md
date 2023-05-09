@@ -23,8 +23,9 @@ CONNECT_STR=mongodb://yourconnectionstring
 
 #### Description
 Every row represents 1 attempt at an exercise within any of the templates. This dataset can be used to answer the following (and many other) questions:
-- How many times is this template used before it is done without errors?
-- Does the learner start again as soon as he makes a mistake?
+1. How many times is this template used before it is done without errors?
+2. Does the learner start again as soon as he makes a mistake?
+3. What is the difference in duration/number of mistakes between de first and last time an exercise is completed?
 
 In R:
 ```R
@@ -81,11 +82,11 @@ If no mistakes are made the value is *NA*.
 
 #### Description
 Every row represents 1 attempt at a letter within Template 2 “Drag the letters”. This dataset can be used to answer the following (and many other) questions:
-- Does the learner work from left to right?
-- How much time is there between listening to the sound and finding the right letter? 
-- Which letters are in the right place at once?
-- How many times does the user play a sound/word during the exercise? How does this change over time?
-- Does the user try all blue buttons in the lettersquare from top-left to bottom-right? How does this change over time?
+1. Does the learner work from left to right?
+2. How much time is there between listening to the sound and finding the right letter? 
+3. Which letters are in the right place at once?
+4. How many times does the user play a sound/word during the exercise? How does this change over time?
+5. Does the user try all blue buttons in the lettersquare from top-left to bottom-right (alphabetic order)? How does this change over time?
 
 In R:
 ```R
@@ -197,3 +198,28 @@ if (postion == prev_letter_position + 1 & word == prev_word) {
     left_to_right = "FALSE"
 }
 ```
+
+### bingo_data.csv
+
+#### Description
+Every row represents 1 attempt at a word within Template 5 “Bingo”. This dataset can be used to answer the following (and many other) questions:
+1. How many times have the different words been played? (After a mistake, the word is repeated.)
+2. Which words are easily confused? (Can we make confusion matrices for each word list?)
+
+#### Columns
+| Name                                          | Description                                                                                           | Example |
+| ---                                           | ---                                                                                                   | --- |
+| user_id                                       | User identifier in the MongoDB database.                                                              | f3039b2f-5864-44cd-8e22-c16072f1e1d3@nt2school |
+| exercise_id                                   | Exercise identifier. Exercises are generated for each attempt, so every row has a different value.    | 63638bf2979071375ca6da7d |
+| start_time                                    | Time when the exercise page was first displayed.                                                      | 2022-11-03T09:37:54.301Z |
+| word_list                                     | Name of the DigLin word list.                                                                         | Lijst 16  - ch - x - c |
+| word                                          | The word that the user is attempting to find.                                                         | jurk |
+| word_answer                                   | The word that is selected by the user.                                                                | jurk |
+| word_attempt                                  | Identifies consecutive answers by the same user in the same exercise to the same word as belonging to the same word_attempt. When the exercise switches to the next word, word_attempt increments by 1. | 2 |
+| correct                                       | Indicates whether the word_answer matches the word.                                                   | false |
+| times_word_played_between_answers             | Times the word is played between previous answer (or start of exercise for initial word) and current answer. | 2 |
+| answer_time                                   | Time (in ms) that has passed since the start of the exercise at the moment of the current answer.     | 11696.0 |
+| time_from_first_word_audio_in_word_attempt    | Time difference (in ms) between the current answer and the first time the relevant word was played in the current word_attempt. | 8778.0 |
+| prev_correct                                  | Identifies if the previous answer was correct. Empty valued if the current answer is the first answer of the exercise. | false |
+| prev_time                                     | Time (in ms) that has passed since the start of the exercise at the moment of the previous answer.    | 11696.0 |
+| answer_duration                               | Subtracts prev_time from answer_time to represent the time (in ms) it took the user to give the current answer. For the first answer, answer_duration equals answer_time. | 4070.0 |
