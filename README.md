@@ -211,7 +211,8 @@ Every row represents 1 attempt at a word within Template 5 “Bingo”. This dat
 | ---                                           | ---                                                                                                   | --- |
 | user_id                                       | User identifier in the MongoDB database.                                                              | f3039b2f-5864-44cd-8e22-c16072f1e1d3@nt2school |
 | exercise_id                                   | Exercise identifier. Exercises are generated for each attempt, so every row has a different value.    | 63638bf2979071375ca6da7d |
-| start_time                                    | Time when the exercise page was first displayed.                                                      | 2022-11-03T09:37:54.301Z |
+| exercise_time                                 | Time when the exercise page was first displayed.                                                      | 2022-11-03T09:37:54.301Z |
+| start_time                                    | Time when the start button was first clicked (in ms).                                                      | 12029 |
 | word_list                                     | Name of the DigLin word list.                                                                         | Lijst 16  - ch - x - c |
 | word                                          | The word that the user is attempting to find.                                                         | jurk |
 | word_answer                                   | The word that is selected by the user.                                                                | jurk |

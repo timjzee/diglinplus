@@ -95,3 +95,39 @@ class ExerciseT2(Exercise):
             if pic_label not in first_pic_times:
                 first_pic_times[pic_label] = float(pic_event["time"])
         return first_pic_times, pics_betw_answers, dur_pic_betw_answers
+    
+
+class ExerciseT5(Exercise):
+    """Sub-class of Exercise that adds methods for analyzing Template 5 (bingo) data."""
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # get response events while keeping track of original index
+        self.action_events = [(num_i, i) for num_i, i in enumerate(self.events, 0) if "action" in i]
+        self.response_events = [i for i in self.action_events if i[1]["action"] == "attempt"]
+        # get audio events for later use
+        self.audio_events = {str(num_i): i for num_i, i in enumerate(self.events, 0) if i["event"] == "playAudio"}
+    
+    def get_start(self):
+        "Return when the start button was clicked."
+        if len([i for i in self.events if i["event"] == "start"]) > 0:
+            return [i for i in self.events if i["event"] == "start"][0]["time"]
+        else:
+            return "nan"
+    
+    def get_audio(self, first_word_times, prev_resp_i, resp_n):
+        """look back for audio events between previous resp and current resp"""
+        resp = self.response_events[resp_n]
+        wrd = resp[1]["parent"]
+        words_betw_answers = []
+        n_word_betw_answers = 0
+        played_audio_indices = [int(i) for i in self.audio_events if int(i) > prev_resp_i and int(i) < resp[0]]
+        for audio_i in played_audio_indices:
+            audio_event = self.events[audio_i]
+            wrd_label = audio_event["target"]
+            words_betw_answers.append(wrd_label)
+            n_word_betw_answers += 1 if wrd_label == wrd else 0
+            if wrd_label not in first_word_times:
+                first_word_times[wrd_label] = float(audio_event["time"])
+
+        return first_word_times, words_betw_answers, n_word_betw_answers
