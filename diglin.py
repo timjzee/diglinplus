@@ -273,8 +273,8 @@ def process_bingo(exercise):
         "word_answer": [],
         "word_attempt": [],
         "correct": [],
-        "words_played_between_answers": [],
-        "words_played_between_words": [],
+        #"words_played_between_answers": [],
+        #"words_played_between_words": [],
         "times_word_played_between_answers": [],
         "times_word_played_between_words": [],
         "answer_time": [],
@@ -311,9 +311,9 @@ def process_bingo(exercise):
             words_betw_words = words_betw_answers
             n_word_betw_words = n_word_betw_answers
         # append audio related variables
-        d["words_played_between_answers"].append(";".join(words_betw_answers))
+        #d["words_played_between_answers"].append(";".join(words_betw_answers))
         d["times_word_played_between_answers"].append(n_word_betw_answers)
-        d["words_played_between_words"].append(";".join(words_betw_words))
+        #d["words_played_between_words"].append(";".join(words_betw_words))
         d["times_word_played_between_words"].append(n_word_betw_words)
         # calculate and append times from audio to answer if applicable
         if wrd in first_word_times:
