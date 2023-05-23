@@ -414,6 +414,6 @@ letter_data.to_csv("letter_data.csv")
 
 bingo_data = construct_dataset(participants, data_type="t5")
 
-bingo_data.to_csv("/Users/tim/Documents/diglinplus/bingo_data.csv")
+bingo_data.to_csv("bingo_data.csv")
 
 mongoengine.disconnect()
