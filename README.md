@@ -221,6 +221,9 @@ Every row represents 1 attempt at a word within Template 5 “Bingo”. This dat
 | times_word_played_between_answers             | Times the word is played between previous answer (or start of exercise for initial word) and current answer. | 2 |
 | answer_time                                   | Time (in ms) that has passed since the start of the exercise at the moment of the current answer.     | 11696.0 |
 | time_from_first_word_audio_in_word_attempt    | Time difference (in ms) between the current answer and the first time the relevant word was played in the current word_attempt. | 8778.0 |
+| num_attempts                                  | Number of attempted answers at the current position in the current word at the time of the current attempt. | 2 |
 | prev_correct                                  | Identifies if the previous answer was correct. Empty valued if the current answer is the first answer of the exercise. | false |
+| first_try                                     | Indicates whether the user answered correctly in their first attempt.                                 | FALSE |
+| first_try_flt                                 | See first_try. FALSE=0.0, TRUE=1.0.                                                                   | 0.0 |
 | prev_time                                     | Time (in ms) that has passed since the start of the exercise at the moment of the previous answer.    | 11696.0 |
 | answer_duration                               | Subtracts prev_time from answer_time to represent the time (in ms) it took the user to give the current answer. For the first answer, answer_duration equals answer_time. | 4070.0 |
