@@ -203,8 +203,32 @@ if (postion == prev_letter_position + 1 & word == prev_word) {
 
 #### Description
 Every row represents 1 attempt at a word within Template 5 “Bingo”. This dataset can be used to answer the following (and many other) questions:
-1. How many times have the different words been played? (After a mistake, the word is repeated.)
-2. Which words are easily confused? (Can we make confusion matrices for each word list?)
+1. How many times are the different words attempted?
+2. How many times have the different words been played? (After a mistake, the word is repeated.)
+3. Which words are easily confused? (Can we make confusion matrices for each word list?)
+
+```R
+d <- read.csv("bingo_data.csv")
+
+# Question 1
+# Let's split by word list. Take word list 16 as example.
+# Also count number of mistakes
+wl16 <- d[d$word_list == "Lijst 16  - ch - x - c",]
+wf <- table(wl16$correct, wl16$word)
+barplot(wf, las=2)
+
+# Question 2
+# Let's use word list 16 again
+n_words_played_between_answers <- sapply(unique(wl16$word), function(x) sum(wl16[wl16$word==x,]$times_word_played_between_answers))
+# normalize by amount of attempts:
+plays_per_attempt <- n_words_played_between_answers / as.vector(table(wl16$word)[unique(wl16$word)])
+barplot(plays_per_attempt, las=2)
+
+# Question 3
+# Let's use list 16 again to make a confusion matrix.
+cm <- table(wl16$word, wl16$word_answer) / as.vector(wl16$word_answer))
+cm
+```
 
 #### Columns
 | Name                                          | Description                                                                                           | Example |

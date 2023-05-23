@@ -303,9 +303,8 @@ def process_bingo(exercise):
         d["answer_time"].append(float(resp[1]["time"]))
         # look back for audio events between previous resp and current resp
         first_word_times, words_betw_answers, n_word_betw_answers = exercise.get_audio(first_word_times, prev_resp_i, resp_n)
-        # We assume that the audio is automatically played if the answer is incorrect
-        if resp[1]["correct"] == "false":
-            n_word_betw_answers += 1
+        # We assume that the audio is automatically played once between answers
+        n_word_betw_answers += 1
         # these variables are only updated between words
         if wrd != prev_wrd:
             words_betw_words = words_betw_answers
