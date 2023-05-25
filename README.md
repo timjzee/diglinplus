@@ -15,7 +15,7 @@ CONNECT_STR=mongodb://yourconnectionstring
     - `mongodump --uri "mongodb://yourconnectionstring" --out "/path/to/databaseDump"`
     - `mongorestore --db progress /path/to/databaseDump/progress`
     - don't forget to change `.env` file: `CONNECT_STR=mongodb://localhost:27017/progress` (27017 is the default port)
-- now you can run `diglin.py`
+- see `example.py` 
 
 ## Codebooks
 
