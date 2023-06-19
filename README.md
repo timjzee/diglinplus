@@ -251,3 +251,42 @@ cm
 | first_try_flt                                 | See first_try. FALSE=0.0, TRUE=1.0.                                                                   | 0.0 |
 | prev_time                                     | Time (in ms) that has passed since the start of the exercise at the moment of the previous answer.    | 11696.0 |
 | answer_duration                               | Subtracts prev_time from answer_time to represent the time (in ms) it took the user to give the current answer. For the first answer, answer_duration equals answer_time. | 4070.0 |
+
+### drag_words_data.csv
+
+#### Description
+Every row represents 1 attempt at a word within Template 3 “Drag the words”. This dataset can be used to answer the following (and many other) questions:
+1. How many times are the different words attempted?
+2. How many times does the user play a sound/word during the exercise? How does this change over time?
+3. Which words are easily confused? (Can we make confusion matrices for each word list?)
+
+```R
+d <- read.csv("drag_words_data.csv")
+```
+
+#### Columns
+| Name                                          | Description                                                                                           | Example |
+| ---                                           | ---                                                                                                   | --- |
+| user_id                                       | User identifier in the MongoDB database.                                                              | f3039b2f-5864-44cd-8e22-c16072f1e1d3@nt2school |
+| exercise_id                                   | Exercise identifier. Exercises are generated for each attempt, so every row has a different value.    | 63638bf2979071375ca6da7d |
+| exercise_time                                 | Time when the exercise page was first displayed.                                                      | 2022-11-03T09:37:54.301Z |
+| start_time                                    | Time when the start button was first clicked (in ms).                                                      | 12029 |
+| word_list                                     | Name of the DigLin word list.                                                                         | Lijst 16  - ch - x - c |
+| word                                          | The word that the user is attempting to find.                                                         | jurk |
+| word_answer                                   | The word that is selected by the user.                                                                | jurk |
+| word_attempt                                  | Identifies consecutive answers by the same user in the same exercise to the same word as belonging to the same word_attempt. When the exercise switches to the next word, word_attempt increments by 1. | 2 |
+| correct                                       | Indicates whether the word_answer matches the word.                                                   | false |
+| times_word_played_between_answers             | Times the word is played between previous answer (or start of exercise for initial word) and current answer. | 2 |
+| answer_time                                   | Time (in ms) that has passed since the start of the exercise at the moment of the current answer.     | 11696.0 |
+| words_played_between_answers                  | A semicolon-separated list of words of which the audio was played between the current answer and the previous answer. | jurk;hek |
+| time_from_first_word_audio_in_word_attempt    | Time difference (in ms) between the current answer and the first time the relevant word was played in the current word_attempt. | 8778.0 |
+| sounds_played_between_answers                 | A semicolon-separated list of sounds (in the sound bar) of which the audio was played between the current answer and the previous answer. | t;d |
+| num_attempts                                  | Number of attempted answers at the current position in the current word at the time of the current attempt. | 2 |
+| prev_correct                                  | Identifies if the previous answer was correct. Empty valued if the current answer is the first answer of the exercise. | false |
+| first_try                                     | Indicates whether the user answered correctly in their first attempt.                                 | FALSE |
+| first_try_flt                                 | See first_try. FALSE=0.0, TRUE=1.0.                                                                   | 0.0 |
+| prev_time                                     | Time (in ms) that has passed since the start of the exercise at the moment of the previous answer.    | 11696.0 |
+| answer_duration                               | Subtracts prev_time from answer_time to represent the time (in ms) it took the user to give the current answer. For the first answer, answer_duration equals answer_time. | 4070.0 |
+| pictures_shown_between_answers                | A semicolon-separated list of pictures that were shown between the current answer and the previous answer. | jurk;jurk |
+| duration_picture_shown_between_answers        | Total duration (in ms) that the picture corresponding to the word was displayed between answers.      | 787.0 |
+| time_from_first_picture_in_word_attempt       | Time difference (in ms) between the current answer and the the first time the relevant picture was shown in the current word_attempt. | 15503.0 |
