@@ -131,3 +131,42 @@ class ExerciseT5(Exercise):
                 first_word_times[wrd_label] = float(audio_event["time"])
 
         return first_word_times, words_betw_answers, n_word_betw_answers
+
+
+class ExerciseT3(ExerciseT2):
+    """
+    Sub-class of Exercise that adds methods for analyzing Template 3 (drag the words) data.
+    It inherits from ExerciseT2, overwrites its get_audio method and adds get_start functionality.
+    """
+    
+    def get_start(self):
+        "Return when the start button was clicked."
+        if len([i for i in self.events if i["event"] == "start"]) > 0:
+            return [i for i in self.events if i["event"] == "start"][0]["time"]
+        else:
+            return "nan"
+    
+    def get_audio(self, first_word_times, prev_resp_i, resp_n):
+        """look back for audio events between previous resp and current resp"""
+        resp = self.response_events[resp_n]
+        wrd = resp[1]["parent"]
+        words_betw_answers = []
+        sounds_betw_answers = []
+        n_word_betw_answers = 0
+        played_audio_indices = [int(i) for i in self.audio_events if int(i) > prev_resp_i and int(i) < resp[0]]
+        for audio_i in played_audio_indices:
+            audio_event = self.events[audio_i]
+            if audio_event["action"] == "playWord":             # if a word is played
+                wrd_label = audio_event["audio"].split(".")[0]
+                words_betw_answers.append(wrd_label)
+                n_word_betw_answers += 1 if wrd_label == wrd else 0
+                if wrd_label not in first_word_times:
+                    first_word_times[wrd_label] = float(audio_event["time"])
+            else:                                           # if a sound from the soundbar is played
+                assert audio_event["action"] == "soundbarSound"
+                # get index of the sound and the word the sound belongs to
+                # get sound label
+                sound_lab = audio_event["audio"]
+                sounds_betw_answers.append(str(sound_lab))
+        
+        return first_word_times, words_betw_answers, sounds_betw_answers, n_word_betw_answers

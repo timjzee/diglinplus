@@ -277,10 +277,13 @@ d <- read.csv("drag_words_data.csv")
 | word_attempt                                  | Identifies consecutive answers by the same user in the same exercise to the same word as belonging to the same word_attempt. When the exercise switches to the next word, word_attempt increments by 1. | 2 |
 | correct                                       | Indicates whether the word_answer matches the word.                                                   | false |
 | times_word_played_between_answers             | Times the word is played between previous answer (or start of exercise for initial word) and current answer. | 2 |
+| times_word_played_between_words               | Times the word is played between previous word (or start of exercise for initial word) and current word. | 2 |
 | answer_time                                   | Time (in ms) that has passed since the start of the exercise at the moment of the current answer.     | 11696.0 |
 | words_played_between_answers                  | A semicolon-separated list of words of which the audio was played between the current answer and the previous answer. | jurk;hek |
+| words_played_between_words                    | A semicolon-separated list of words of which the audio was played between the current word and the previous word. | jurk;hek |
 | time_from_first_word_audio_in_word_attempt    | Time difference (in ms) between the current answer and the first time the relevant word was played in the current word_attempt. | 8778.0 |
 | sounds_played_between_answers                 | A semicolon-separated list of sounds (in the sound bar) of which the audio was played between the current answer and the previous answer. | t;d |
+| sounds_played_between_words                   | A semicolon-separated list of sounds (in the sound bar) of which the audio was played between the current word and the previous word. | t;d |
 | num_attempts                                  | Number of attempted answers at the current position in the current word at the time of the current attempt. | 2 |
 | prev_correct                                  | Identifies if the previous answer was correct. Empty valued if the current answer is the first answer of the exercise. | false |
 | first_try                                     | Indicates whether the user answered correctly in their first attempt.                                 | FALSE |
@@ -289,4 +292,10 @@ d <- read.csv("drag_words_data.csv")
 | answer_duration                               | Subtracts prev_time from answer_time to represent the time (in ms) it took the user to give the current answer. For the first answer, answer_duration equals answer_time. | 4070.0 |
 | pictures_shown_between_answers                | A semicolon-separated list of pictures that were shown between the current answer and the previous answer. | jurk;jurk |
 | duration_picture_shown_between_answers        | Total duration (in ms) that the picture corresponding to the word was displayed between answers.      | 787.0 |
+| pictures_shown_between_words                  | A semicolon-separated list of pictures that were shown between the current word and the previous word. | jurk;jurk |
+| duration_picture_shown_between_words          | Total duration (in ms) that the picture corresponding to the word was displayed between words.      | 787.0 |
 | time_from_first_picture_in_word_attempt       | Time difference (in ms) between the current answer and the the first time the relevant picture was shown in the current word_attempt. | 15503.0 |
+
+
+##### Note on negative durations
+Some duration variables such as `answer_duration` may show negative durations. This is due to timing inaccuracies in the DigLin+ app. It seems that times associated with answers run on a slightly different clock compared to times associated with the start of the exercise of the start of an audio fragment.
