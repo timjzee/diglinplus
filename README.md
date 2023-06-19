@@ -226,8 +226,10 @@ barplot(plays_per_attempt, las=2)
 
 # Question 3
 # Let's use list 16 again to make a confusion matrix.
-cm <- table(wl16$word, wl16$word_answer) / as.vector(wl16$word_answer))
+cm <- table(wl16$word, wl16$word_answer)
 cm
+# we can also normalize the confusion matrix
+cm / as.vector(table(wl16$word_answer))
 ```
 
 #### Columns
@@ -262,6 +264,33 @@ Every row represents 1 attempt at a word within Template 3 “Drag the words”.
 
 ```R
 d <- read.csv("drag_words_data.csv")
+
+# Question 1
+# Let's split by word list. Take word list 16 as example.
+# Also count number of mistakes
+wl16 <- d[d$word_list == "Lijst 16  - ch - x - c",]
+wf <- table(wl16$correct, wl16$word)
+barplot(wf, las=2)
+
+# Question 2
+d$correct_int <- ifelse(d$correct == "true", 1, 0)
+n_words_played_between_answers <- sapply(unique(d$exercise_id), function(x) sum(d[d$exercise_id==x,]$times_word_played_between_answers)/(sum(d[d$exercise_id==x,]$correct_int)+1))
+pp <- sapply(unique(d$exercise_id), function(x) d[d$exercise_id==x,]$user_id[1])
+pp_tbl <- table(pp)
+exercise_number_pp <- sapply(unique(pp), function(x) 1:pp_tbl[x])
+d2 <- data.frame(user_id=pp, exercise_id=names(n_words_played_between_answers), exercise_number=unlist(exercise_number_pp), n_words_played_between_answers)
+plot(d2$exercise_number, d2$n_words_played_between_answers, col=rgb(red = 0, green = 0, blue = 1, alpha = 0.2))
+# There seems to be a clear negative relation. This is supported by a correlation measure:
+cor(d2$exercise_number, d2$n_words_played_between_answers)
+# -0.2550707
+# the horizontal lines at 0 and 1 are probably the result of some users almost never playing the words and other users almost always playing each word once, regardless of their experience.
+
+# Question 3
+# Let's use list 16 again to make a confusion matrix.
+cm <- table(wl16$word, wl16$word_answer)
+cm
+# we can also normalize the confusion matrix
+cm / as.vector(table(wl16$word_answer))
 ```
 
 #### Columns
