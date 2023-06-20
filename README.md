@@ -131,7 +131,8 @@ barplot(d2[d2$user_id==unique(d2$user_id)[17],]$n_sounds_played_between_answers)
 # Others switch strategies: listening to sounds vs. listening to words:
 s <- d2[d2$user_id==unique(d2$user_id)[20],]$n_sounds_played_between_answers
 w <- d2[d2$user_id==unique(d2$user_id)[20],]$n_words_played_between_answers
-barplot(t(array(c(s,w), dim = c(length(s), 2))))
+barplot(t(array(c(s,w), dim = c(length(s), 2))), xlab="Time (exercise number)", ylab="Proportion of answers with audio", col = c("grey", "white"))
+legend(x = "topright", legend = c("Word", "Sound"), fill = c("white", "grey"))
 
 # Question 5
 # First we need establish for each word list, which letters are enabled, and sort them alphabetically:
