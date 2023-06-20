@@ -21,7 +21,7 @@ CONNECT_STR=mongodb://yourconnectionstring
 
 ### Manual inspection of Database
 - if you want to inspect the MongoDB database manually, connect to it using something like *MongoDB Compass*
-- you can then search the collections (users) using queries like `{ application: "bingo_v2", events: { $elemMatch: { action: "soundbarSound" } } }`
+- you can then search the collections (users) using queries like `{ application: "t3_sleep_de_woorden", events: { $elemMatch: { action: "soundbarSound" } } }`
 
 
 ## Codebooks
