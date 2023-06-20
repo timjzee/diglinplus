@@ -3,6 +3,8 @@ Scripts for DigLin+ data processing and analysis.
 See [examples](https://www.nt2.nl/nl/dossier/diglin/diglin-videos) of exercises.
 
 ## Instructions
+
+### Generating datasets
 - Clone this repo `git clone git@github.com:timjzee/diglinplus.git`
 - `pip install -r requirements.txt` in a virtual environment
 - Ask the project supervisor for the connection string and create a `.env` file:
@@ -15,7 +17,12 @@ CONNECT_STR=mongodb://yourconnectionstring
     - `mongodump --uri "mongodb://yourconnectionstring" --out "/path/to/databaseDump"`
     - `mongorestore --db progress /path/to/databaseDump/progress`
     - don't forget to change `.env` file: `CONNECT_STR=mongodb://localhost:27017/progress` (27017 is the default port)
-- see `example.py` 
+- see `example.py` for examples of how to generate the datasets
+
+### Manual inspection of Database
+- if you want to inspect the MongoDB database manually, connect to it using something like *MongoDB Compass*
+- you can then search the collections (users) using queries like `{ application: "bingo_v2", events: { $elemMatch: { action: "soundbarSound" } } }`
+
 
 ## Codebooks
 
