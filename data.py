@@ -110,27 +110,34 @@ class DataExercise:
         return df
     
 
-class DataT2(DataExercise):
+class Data(DataExercise):
+    """Overwrites process_pp with something more generalizable."""
     def __init__(self):
         self.df = pd.DataFrame()
-        self.regex_pattern = "t2_sleep_de_letters"
+        self.regex_pattern = ".*"
+        self.model_name = "Exercise"
     
     def process_pp(self, results):
-        """
-        Takes a participant's exercises and
-        returns a dataframe containing variables relevant to T2-level
-        questions.
-        """
         df_pp = pd.DataFrame()
         for result in results:
-            # create T2 result to add T2-specific methods
-            t2_result = models.ExerciseT2(**result.to_mongo())
+            # create result to add template-specific methods
+            result = getattr(models, self.model_name)(**result.to_mongo())
             # process it
-            df_exercise = self.process_letters(t2_result)
+            df_exercise = self.process_exercise(result)
             df_pp = pd.concat([df_pp, df_exercise])
         return df_pp
     
-    def process_letters(self, exercise):
+    def process_exercise(exercise):
+        return
+
+
+class DataT2(Data):
+    def __init__(self):
+        self.df = pd.DataFrame()
+        self.regex_pattern = "t2_sleep_de_letters"
+        self.model_name = "ExerciseT2"
+    
+    def process_exercise(self, exercise):
         """
         Takes a participant's exercise object and for each attempt at a letter
         collects relevant variables, which are returned as a dataframe.
@@ -269,27 +276,13 @@ class DataT2(DataExercise):
         return(df)
     
 
-class DataT5(DataExercise):
+class DataT5(Data):
     def __init__(self):
         self.df = pd.DataFrame()
         self.regex_pattern = "bingo_v2"
+        self.model_name = "ExerciseT5"
     
-    def process_pp(self, results):
-        """
-        Takes a participant's exercises and
-        returns a dataframe containing variables relevant to T5-level
-        questions.
-        """
-        df_pp = pd.DataFrame()
-        for result in results:
-            # create T5 result to add T5-specific methods
-            t5_result = models.ExerciseT5(**result.to_mongo())
-            # process it
-            df_exercise = self.process_bingo(t5_result)
-            df_pp = pd.concat([df_pp, df_exercise])
-        return df_pp
-    
-    def process_bingo(self, exercise):
+    def process_exercise(self, exercise):
         """
         Takes a participant's exercise object and for each attempt at a word
         collects relevant variables, which are returned as a dataframe.
@@ -369,27 +362,13 @@ class DataT5(DataExercise):
         return(df)
     
 
-class DataT3(DataExercise):
+class DataT3(Data):
     def __init__(self):
         self.df = pd.DataFrame()
         self.regex_pattern = "t3_sleep_de_woorden"
-
-    def process_pp(self, results):
-        """
-        Takes a participant's exercises and
-        returns a dataframe containing variables relevant to T3-level
-        questions.
-        """
-        df_pp = pd.DataFrame()
-        for result in results:
-            # create T3 result to add T3-specific methods
-            t3_result = models.ExerciseT3(**result.to_mongo())
-            # process it
-            df_exercise = self.process_drag_words(t3_result)
-            df_pp = pd.concat([df_pp, df_exercise])
-        return df_pp
+        self.model_name = "ExerciseT3"
     
-    def process_drag_words(self, exercise):
+    def process_exercise(self, exercise):
         """
         Takes a participant's exercise object and for each attempt at a word
         collects relevant variables, which are returned as a dataframe.

@@ -333,6 +333,17 @@ cm / as.vector(table(wl16$word_answer))
 | duration_picture_shown_between_words          | Total duration (in ms) that the picture corresponding to the word was displayed between words.      | 787.0 |
 | time_from_first_picture_in_word_attempt       | Time difference (in ms) between the current answer and the the first time the relevant picture was shown in the current word_attempt. | 15503.0 |
 
+### form_words_data.csv
+
+#### Description
+Every row represents 1 attempt at a word within Template 4 “Form the words”. This dataset can be used to answer the following (and many other) questions:
+1. How many times are the different words attempted?
+2. Welke woorden, klanken en letters worden afgespeeld?
+3. In welke volgorde worden klanken en letters afgespeeld
+
+
+
+
 
 ##### Note on negative durations
 Some duration variables such as `answer_duration` may show negative durations. This is due to timing inaccuracies in the DigLin+ app. It seems that times associated with answers run on a slightly different clock compared to times associated with the start of the exercise of the start of an audio fragment.
