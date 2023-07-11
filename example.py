@@ -1,6 +1,6 @@
 import config
 import mongoengine
-from data import DataExercise, DataT2, DataT3, DataT5
+from data import DataExercise, DataT2, DataT3, DataT4, DataT5
 import matplotlib.pyplot as plt
 
 
@@ -40,6 +40,11 @@ bingo_data.save("bingo_data_test.csv")
 dw_data = DataT3()
 dw_data.construct(participants)
 dw_data.save("drag_words_data.csv")
+
+# form_words data
+fw_data = DataT4()
+fw_data.construct(participants)
+fw_data.save("form_words_data.csv")
 
 
 mongoengine.disconnect()

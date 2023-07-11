@@ -472,3 +472,98 @@ class DataT3(Data):
         df["answer_duration"] = df["answer_time"] - df["prev_time"]
         df.loc[0, "answer_duration"] = df.loc[0, "answer_time"] - float(df.loc[0, "start_time"])
         return(df)
+    
+
+class DataT4(Data):
+    def __init__(self):
+        self.df = pd.DataFrame()
+        self.regex_pattern = "t4_vorm_de_woorden"
+        self.model_name = "ExerciseT4"
+    
+    def process_exercise(self, exercise):
+        """
+        Takes a participant's exercise object and for each attempt at a word
+        collects relevant variables, which are returned as a dataframe.
+        """
+        if len(exercise.response_events) == 0:
+            return pd.DataFrame()
+        # initialize dictionary
+        d = {
+            "user_id": [],
+            "exercise_id": [],
+            "exercise_time": [],
+            "start_time": [],
+            "word_list": [],
+            "word": [],
+            "word_answer": [],
+            "word_attempt": [],
+            "correct": [],
+            "times_sounds_played_between_answers": [],
+            "times_sounds_played_between_words": [],
+            "answer_time": [],
+            "time_from_first_sound_audio_in_word_attempt": [],
+            "audio_played_between_answers": [],
+            "audio_played_between_words": [],
+            "pictures_shown_between_answers": [],
+            "pictures_shown_between_words": []
+        }
+        # step through responses to collect data
+        prev_resp_i = 0
+        prev_wrd = "NA"
+        n_sounds_betw_words = 0
+        audio_betw_words = []
+        pics_betw_words = []
+        wrd_attempt = 0
+        for resp_n, resp in enumerate(exercise.response_events, 0):
+            d["user_id"].append(exercise["user"])
+            d["exercise_id"].append(exercise["_id"].__str__())
+            d["exercise_time"].append(exercise["timestamp"])
+            d["start_time"].append(exercise.get_start())
+            d["word_list"].append(exercise["path"][2]["title"])
+            wrd = resp[1]["parent"]
+            d["word"].append(wrd)
+            d["word_answer"].append(resp[1]["givenAnswer"])
+            d["correct"].append(resp[1]["correct"])
+            if wrd != prev_wrd:
+                wrd_attempt += 1
+                first_sound_times = {}
+            d["word_attempt"].append(wrd_attempt)
+            d["answer_time"].append(float(resp[1]["time"]))
+            # look back for audio events between previous resp and current resp
+            first_sound_times, audio_betw_answers, n_sounds_betw_answers = exercise.get_audio(first_sound_times, prev_resp_i, resp_n)
+            # shouldn't we als do:
+            n_sounds_betw_words += n_sounds_betw_answers
+            # look back for picture events between previous resp and current resp
+            first_pic_times, pics_betw_answers, dur_pic_betw_answers = exercise.get_pictures({}, prev_resp_i, resp_n)
+            # these variables are only updated between words
+            if wrd != prev_wrd:
+                audio_betw_words = audio_betw_answers
+                n_sounds_betw_words = n_sounds_betw_answers
+                pics_betw_words = pics_betw_answers
+            # append audio related variables
+            d["audio_played_between_answers"].append(";".join(audio_betw_answers))
+            d["times_sounds_played_between_answers"].append(n_sounds_betw_answers)
+            d["audio_played_between_words"].append(";".join(audio_betw_words))
+            d["times_sounds_played_between_words"].append(n_sounds_betw_words)
+            # append picture related variables
+            d["pictures_shown_between_answers"].append(";".join(pics_betw_answers))
+            d["pictures_shown_between_words"].append(";".join(pics_betw_words))
+            # calculate and append times from word audio to answer if applicable
+            if len(first_sound_times) > 0:
+                d["time_from_first_sound_audio_in_word_attempt"].append(float(resp[1]["time"]) - min(first_sound_times.values()))
+            else:
+                d["time_from_first_sound_audio_in_word_attempt"].append(float("nan"))
+            # update relevant variables for next response
+            prev_resp_i = resp[0]
+            prev_wrd = wrd
+        # construct initial dataframe
+        df = pd.DataFrame(d)
+        # derive more variables from initial variables
+        df["num_attempts"] = df.groupby(["word"]).cumcount() + 1
+        df["prev_correct"] = df["correct"].shift()
+        df["first_try"] = np.where(df.num_attempts.eq(1) & df.correct.eq("true"), "TRUE", "FALSE")
+        df["first_try_flt"] = np.where(df.first_try.eq("TRUE"), 1.0, 0.0)
+        df["prev_time"] = df["answer_time"].shift()
+        df["answer_duration"] = df["answer_time"] - df["prev_time"]
+        df.loc[0, "answer_duration"] = df.loc[0, "answer_time"] - float(df.loc[0, "start_time"])
+        return(df)
