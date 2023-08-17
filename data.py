@@ -47,6 +47,7 @@ class DataExercise:
             "user_id": [],
             "exercise_id": [],
             "template": [],
+            "template_version": [],
             "start_time": [],
             "word_list": [],
             "completed": [],
@@ -64,6 +65,7 @@ class DataExercise:
             d["start_time"].append(result["timestamp"])
             d["word_list"].append(result["path"][2]["title"])
             d["template"].append(result["application"])
+            d["template_version"].append(result["path"][-1]["title"])
             d["duration"].append(result.return_duration())
             d["completed"].append(result.return_complete())
             n_mistakes, action = result.return_mistakes()
@@ -148,6 +150,7 @@ class DataT2(Data):
         d = {
             "user_id": [],
             "exercise_id": [],
+            "template_version": [],
             "start_time": [],
             "word_list": [],
             "word": [],
@@ -187,6 +190,7 @@ class DataT2(Data):
         for resp_n, resp in enumerate(exercise.response_events, 0):
             d["user_id"].append(exercise["user"])
             d["exercise_id"].append(exercise["_id"].__str__())
+            d["template_version"].append(exercise["path"][-1]["title"])
             d["start_time"].append(exercise["timestamp"])
             d["word_list"].append(exercise["path"][2]["title"])
             wrd = resp[1]["parent"]
@@ -293,6 +297,7 @@ class DataT5(Data):
         d = {
             "user_id": [],
             "exercise_id": [],
+            "template_version": [],
             "exercise_time": [],
             "start_time": [],
             "word_list": [],
@@ -316,6 +321,7 @@ class DataT5(Data):
         for resp_n, resp in enumerate(exercise.response_events, 0):
             d["user_id"].append(exercise["user"])
             d["exercise_id"].append(exercise["_id"].__str__())
+            d["template_version"].append(exercise["path"][-1]["title"])
             d["exercise_time"].append(exercise["timestamp"])
             d["start_time"].append(exercise.get_start())
             d["word_list"].append(exercise["path"][2]["title"])
@@ -379,6 +385,7 @@ class DataT3(Data):
         d = {
             "user_id": [],
             "exercise_id": [],
+            "template_version": [],
             "exercise_time": [],
             "start_time": [],
             "word_list": [],
@@ -412,6 +419,7 @@ class DataT3(Data):
         for resp_n, resp in enumerate(exercise.response_events, 0):
             d["user_id"].append(exercise["user"])
             d["exercise_id"].append(exercise["_id"].__str__())
+            d["template_version"].append(exercise["path"][-1]["title"])
             d["exercise_time"].append(exercise["timestamp"])
             d["start_time"].append(exercise.get_start())
             d["word_list"].append(exercise["path"][2]["title"])
@@ -491,6 +499,7 @@ class DataT4(Data):
         d = {
             "user_id": [],
             "exercise_id": [],
+            "template_version": [],
             "exercise_time": [],
             "start_time": [],
             "word_list": [],
@@ -517,6 +526,7 @@ class DataT4(Data):
         for resp_n, resp in enumerate(exercise.response_events, 0):
             d["user_id"].append(exercise["user"])
             d["exercise_id"].append(exercise["_id"].__str__())
+            d["template_version"].append(exercise["path"][-1]["title"])
             d["exercise_time"].append(exercise["timestamp"])
             d["start_time"].append(exercise.get_start())
             d["word_list"].append(exercise["path"][2]["title"])
