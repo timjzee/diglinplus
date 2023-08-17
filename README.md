@@ -12,7 +12,7 @@ See [examples](https://www.nt2.nl/nl/dossier/diglin/diglin-videos) of exercises.
 # MongoDB connection string
 CONNECT_STR=mongodb://yourconnectionstring
 ```
-- If you want to continue development of this repo you should probably get a local copy of the database, so you're not constantly pulling the entire database over the internet:
+- If you want to continue development of this repo you should probably get a local copy of the database, so you're not constantly pulling the entire database over the internet. On macOS you would do:
     - start local mongodb server `brew services start mongodb-community@6.0`
     - `mongodump --uri "mongodb://yourconnectionstring" --out "/path/to/databaseDump"`
     - `mongorestore --db progress /path/to/databaseDump/progress`
@@ -49,10 +49,13 @@ table(d$behaviour_after_first_mistake)
 | user_id                       | User identifier in the MongoDB database.                                                              | f3039b2f-5864-44cd-8e22-c16072f1e1d3@nt2school |
 | exercise_id                   | Exercise identifier. Exercises are generated for each attempt, so every row has a different value.    | 63638bf2979071375ca6da7d |
 | template                      | Name of the DigLin Template. Placeholder in case the dataset is extended to other Templates.          | t2_sleep_de_letters |
-| start_time                    | Time when the exercise page was first displayed.                                                      | 2022-11-03T09:37:54.301Z |
+| exercise_time                 | Time when the exercise page was first displayed.                                                      | 2022-11-03T09:37:54.301Z |
+| start_time                    | Time when the start button was first clicked (in ms).                                                 | 12029 |
 | word_list                     | Name of the DigLin word list.                                                                         | Lijst 16  - ch - x - c |
 | completed                     | Indicates whether the user completed the exercise attempt.                                            | True |
 | completed_float               | See completed, but True = 1.0 and False = 0.0. Used to compute other variables.                       | 1.0 |
+| completed_time                | Time when the exercise was completed (in ms).                                                         | 813324 |
+| completed_duration            | Time in seconds from pressing start until completing the exercise.                                    | 98.594 |
 | duration                      | Time in seconds from the start of the exercise until the exercise page was closed.                    | 59.721 |
 | num_mistakes                  | Number of wrong answers given in the attempt.                                                         | 5.0 |
 | action_after_first_mistake    | Encodes whether a user chose to immediately quit or continue after making their first mistake. A value of NA indicates no mistakes were made. | quit |
@@ -160,7 +163,8 @@ cor(d2$exercise_number, d2$n_alphabetical_answers)
 | ---                                           | ---                                                                                                   | --- |
 | user_id                                       | User identifier in the MongoDB database.                                                              | f3039b2f-5864-44cd-8e22-c16072f1e1d3@nt2school |
 | exercise_id                                   | Exercise identifier. Exercises are generated for each attempt, so every row has a different value.    | 63638bf2979071375ca6da7d |
-| start_time                                    | Time when the exercise page was first displayed.                                                      | 2022-11-03T09:37:54.301Z |
+| exercise_time                                 | Time when the exercise page was first displayed.    | 2022-11-03T09:37:54.301Z |
+| start_time                                    | Time when the start button was first clicked (in ms). | 12029 |
 | word_list                                     | Name of the DigLin word list.                                                                         | Lijst 16  - ch - x - c |
 | word                                          | The word that the user is attempting to spell.                                                        | jurk |
 | prev_word                                     | The word that the user was attempting to spell in the previous answer.                                | hek |

@@ -18,8 +18,11 @@ class Exercise(mongoengine.Document):
     # some methods do not not apply to t1
     def return_complete(self):
         if self.application == "t1_de_woorden":
-            return float("nan")
-        return "completed" in [i["event"] for i in self.events]
+            return float("nan"), float("nan")
+        completed = "completed" in [i["event"] for i in self.events]
+        if not completed:
+            return False, float("nan")
+        return True, [i for i in self.events if i["event"] == "completed"][0]["time"]
 
     def return_mistakes(self):
         if self.application == "t1_de_woorden":
@@ -32,6 +35,13 @@ class Exercise(mongoengine.Document):
 
     def return_duration(self):
         return float([i for i in self.events if i["event"] != "close"][-1]["time"]) / 1000
+    
+    def get_start(self):
+        "Return when the start button was clicked."
+        if len([i for i in self.events if i["event"] == "start"]) > 0:
+            return [i for i in self.events if i["event"] == "start"][0]["time"]
+        else:
+            return "nan"
 
 
 class ExerciseT2(Exercise):
@@ -108,13 +118,6 @@ class ExerciseT5(Exercise):
         # get audio events for later use
         self.audio_events = {str(num_i): i for num_i, i in enumerate(self.events, 0) if i["event"] == "playAudio"}
     
-    def get_start(self):
-        "Return when the start button was clicked."
-        if len([i for i in self.events if i["event"] == "start"]) > 0:
-            return [i for i in self.events if i["event"] == "start"][0]["time"]
-        else:
-            return "nan"
-    
     def get_audio(self, first_word_times, prev_resp_i, resp_n):
         """look back for audio events between previous resp and current resp"""
         resp = self.response_events[resp_n]
@@ -136,15 +139,8 @@ class ExerciseT5(Exercise):
 class ExerciseT3(ExerciseT2):
     """
     Sub-class of Exercise that adds methods for analyzing Template 3 (drag the words) data.
-    It inherits from ExerciseT2, overwrites its get_audio method and adds get_start functionality.
+    It inherits from ExerciseT2 and overwrites its get_audio method.
     """
-    
-    def get_start(self):
-        "Return when the start button was clicked."
-        if len([i for i in self.events if i["event"] == "start"]) > 0:
-            return [i for i in self.events if i["event"] == "start"][0]["time"]
-        else:
-            return "nan"
     
     def get_audio(self, first_word_times, prev_resp_i, resp_n):
         """look back for audio events between previous resp and current resp"""
@@ -175,15 +171,8 @@ class ExerciseT3(ExerciseT2):
 class ExerciseT4(ExerciseT2):
     """
     Sub-class of Exercise that adds methods for analyzing Template 4 (form the words) data.
-    It inherits from ExerciseT2, overwrites its get_audio method and adds get_start functionality.
+    It inherits from ExerciseT2 and overwrites its get_audio method.
     """
-
-    def get_start(self):
-        "Return when the start button was clicked."
-        if len([i for i in self.events if i["event"] == "start"]) > 0:
-            return [i for i in self.events if i["event"] == "start"][0]["time"]
-        else:
-            return "nan"
         
     def get_audio(self, first_sound_times, prev_resp_i, resp_n):
         """look back for audio events between previous resp and current resp"""

@@ -48,9 +48,11 @@ class DataExercise:
             "exercise_id": [],
             "template": [],
             "template_version": [],
+            "exercise_time": [],
             "start_time": [],
             "word_list": [],
             "completed": [],
+            "completed_time": [],
             "duration": [],
             "num_mistakes": [],
             "action_after_first_mistake": []
@@ -62,12 +64,15 @@ class DataExercise:
                 continue
             d["user_id"].append(result["user"])
             d["exercise_id"].append(result["_id"].__str__())
-            d["start_time"].append(result["timestamp"])
+            d["exercise_time"].append(result["timestamp"])
+            d["start_time"].append(result.get_start())
             d["word_list"].append(result["path"][2]["title"])
             d["template"].append(result["application"])
             d["template_version"].append(result["path"][-1]["title"])
             d["duration"].append(result.return_duration())
-            d["completed"].append(result.return_complete())
+            completed, completed_time = result.return_complete()
+            d["completed"].append(completed)
+            d["completed_time"].append(completed_time)
             n_mistakes, action = result.return_mistakes()
             d["num_mistakes"].append(n_mistakes)
             d["action_after_first_mistake"].append(action)
@@ -76,6 +81,7 @@ class DataExercise:
         # Add some more variables based on initial variables
         df["exercise_number"] = range(1, df.shape[0] + 1)
         df["times_previously_attempted"] = df.groupby(["template", "word_list"]).cumcount()
+        df["completed_duration"] = (df["completed_time"].astype(float) - df["start_time"].astype(float)) / 1000
         df["completed_float"] = df["completed"].astype(float)
         df["times_previously_completed"] = df.groupby(["template", "word_list"], group_keys=False)["completed_float"].apply(lambda x : x.shift().cumsum())
         df["correct"] = df["num_mistakes"].apply(lambda x : 1.0 if x == 0 else 0.0 if x > 0 else float("nan")) * df["completed_float"]
@@ -151,6 +157,7 @@ class DataT2(Data):
             "user_id": [],
             "exercise_id": [],
             "template_version": [],
+            "exercise_time": [],
             "start_time": [],
             "word_list": [],
             "word": [],
@@ -191,7 +198,8 @@ class DataT2(Data):
             d["user_id"].append(exercise["user"])
             d["exercise_id"].append(exercise["_id"].__str__())
             d["template_version"].append(exercise["path"][-1]["title"])
-            d["start_time"].append(exercise["timestamp"])
+            d["exercise_time"].append(exercise["timestamp"])
+            d["start_time"].append(exercise.get_start())
             d["word_list"].append(exercise["path"][2]["title"])
             wrd = resp[1]["parent"]
             d["word"].append(wrd)
@@ -276,7 +284,7 @@ class DataT2(Data):
         df["same_letter_in_diff_word"] = np.where(df.prev_letter.eq(df.chosen_letter) & df.word.ne(df.prev_word), "TRUE", "FALSE")
         df["prev_time"] = df["answer_time"].shift()
         df["answer_duration"] = df["answer_time"] - df["prev_time"]
-        df.loc[0, "answer_duration"] = df.loc[0, "answer_time"]
+        df.loc[0, "answer_duration"] = df.loc[0, "answer_time"] - float(df.loc[0, "start_time"])
         return(df)
     
 
