@@ -40,8 +40,11 @@ class Exercise(mongoengine.Document):
         "Return when the start button was clicked."
         if len([i for i in self.events if i["event"] == "start"]) > 0:
             return [i for i in self.events if i["event"] == "start"][0]["time"]
-        else:
-            return "nan"
+        # mainly for T6 Luister en Typ which doesn't have start logs
+        actions = [i for i in self.events if "action" in i]
+        if len([a for a in actions if a["action"] == "attempt"]) > 0:
+            return [a for a in actions if a["action"] == "attempt"][0]["time"]
+        return "nan"
 
 
 class ExerciseT2(Exercise):

@@ -15,10 +15,10 @@ exercise_data = DataExercise()
 exercise_data.construct(participants)
 
 # saving and loading
-exercise_data.save("exercise_data_test.csv")
+exercise_data.save("exercise_data.csv")
 exercise_data = DataExercise()
 exercise_data.df
-exercise_data.load("exercise_data_test.csv")
+exercise_data.load("exercise_data.csv")
 
 # visualize some data
 exercise_data.df.plot(kind = 'scatter', x = 'exercise_number', y = 'num_mistakes')
@@ -34,7 +34,7 @@ plt.show()
 # bingo data
 bingo_data = DataT5()
 bingo_data.construct(participants)
-bingo_data.save("bingo_data_test.csv")
+bingo_data.save("bingo_data.csv")
 
 # drag_words data
 dw_data = DataT3()
